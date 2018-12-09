@@ -106,7 +106,12 @@
 <script>
     //Demo
     layui.use('form', function(){
-
+        var form = layui.form();
+        console.error(form)
+        //监听提交
+        form.on('submit(formDemo)', function(data){
+            console.error(JSON.stringify(data.field));
+        });
 
     });
 

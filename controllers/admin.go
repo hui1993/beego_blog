@@ -57,17 +57,18 @@ func (c *AdminController) Login() {
 			c.History("账号不存在","")
 		}
 
-		if util.Md5(password) != strings.Trim(user.Password, " ") {
+		if password != user.Password {
 			c.History("密码错误", "")
 		}
 		user.LastIp = c.getClientIp()
 		user.LoginCount = user.LoginCount +1
-		if _, err := c.o.Update(&user); err != nil {
+		_, err := c.o.Update(&user)
+		if  err != nil {
 			c.History("登录异常", "")
 		} else {
+			c.SetSession("user", user)
 			c.History("登录成功", "/admin/main.html")
 		}
-		c.SetSession("user", user)
 	}
 	c.TplName = c.controllerName+"/login.html"
 }
@@ -138,7 +139,7 @@ func (c *AdminController) Article() {
 	c.TplName = c.controllerName + "/_form.tpl"
 }
 
-//上传接口
+//上传接口,
 func (c *AdminController) Upload() {
 	f, h, err := c.GetFile("uploadname")
 	result := make(map[string]interface{})
@@ -150,8 +151,8 @@ func (c *AdminController) Upload() {
 			result["code"] = 1
 			result["message"] = "上传只能.jpg 或者png格式"
 		}
-		img = "/static/upload/" + util.UniqueId()+"."+exStr;
-		c.SaveToFile("upFilename", img) // 保存位置在 static/upload, 没有文件夹要先创建
+		img = "static/upload/" + util.UniqueId()+"."+exStr;
+		c.SaveToFile("uploadname", img) // 保存位置在 static/upload, 没有文件夹要先创建
 		result["code"] = 0
 		result["message"] =img
 	}else{
@@ -175,7 +176,7 @@ func (c * AdminController) Save()  {
 	post.Url = c.Input().Get("url")
 	post.CategoryId, _ = c.GetInt("cate_id")
 	post.Info = c.Input().Get("info")
-	post.Image = c.Input().Get("image")
+	post.Image = c.Input().Get("Image")
 	post.Created = time.Now()
 	post.Updated = time.Now()
 
@@ -235,6 +236,9 @@ func (c *AdminController) CategorySave() {
 	id := c.Input().Get("id")
 	category := models.Category{}
 	category.Name = name
+	category.Created = time.Now()
+	category.Updated = time.Now()
+
 	if id == "" {
 		if _, err := c.o.Insert(&category); err != nil {
 			c.History("插入数据错误", "")

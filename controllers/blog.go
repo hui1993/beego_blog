@@ -94,7 +94,6 @@ func (c *BlogController) Detail()  {
 		querys := c.o.QueryTable(new(models.Post).TableName()).Filter("types", 1)
 		querys.OrderBy("-views").Limit(10, 0).All(&hosts)
 		c.Data["hosts"] = hosts
-
 	}
 	c.TplName = c.controllerName+ "/detail.html"
 }
